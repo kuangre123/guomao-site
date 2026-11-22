@@ -1,6 +1,6 @@
 # 国贸不打烊 · 网页版
 
-在线玩：https://kuangre123.github.io/guomao-site/
+在线玩：https://gta.xiaozhonglvyou.com
 
 骑上摩托，在北京国贸到处溜达：飞跳台、钻火圈、翻跟头、耍帅。摩托、街上的车和人由 Aholo Lux3D 生成。
 
