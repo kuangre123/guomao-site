@@ -1,0 +1,253 @@
+:root {
+  --ink: #f4f1ea;
+  --dim: rgba(244, 241, 234, 0.62);
+  --gold: #f2c14e;
+  --cyan: #5ff0ff;
+  --red: #e5484d;
+  --green: #46c37b;
+  --panel: rgba(14, 17, 23, 0.74);
+  --line: rgba(255, 255, 255, 0.12);
+  --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --num: "DIN Alternate", "DIN Condensed", "Avenir Next Condensed", "Helvetica Neue", var(--font);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0b0d11; color: var(--ink); font: 14px/1.5 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+#hud { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.6s ease 0.2s; }
+#hud.is-live { opacity: 1; }
+kbd { font: 600 11px/1 var(--num); padding: 3px 6px; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.08); color: var(--ink); }
+
+/* ── 开始画面 ── */
+/* 标题贴上沿、按钮贴下沿，中间整块留给街景和主角（横屏竖屏都一样） */
+.boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: clamp(26px, 8vh, 84px) 20px clamp(16px, 4vh, 40px); text-align: center; background: radial-gradient(120% 90% at 50% 100%, #3a2430 0%, #141826 45%, #07090d 100%); z-index: 50; transition: opacity 0.7s ease, background 0.9s ease; }
+.boot.is-ready { background: linear-gradient(180deg, rgba(7, 9, 13, 0.84) 0%, rgba(7, 9, 13, 0.6) 20%, rgba(7, 9, 13, 0) 42%, rgba(7, 9, 13, 0) 58%, rgba(7, 9, 13, 0.52) 76%, rgba(7, 9, 13, 0.9) 100%); }
+.boot.is-done { opacity: 0; pointer-events: none; }
+.boot__head, .boot__foot { width: 100%; }
+.boot__title { font-size: clamp(40px, min(11vw, 13vh), 96px); white-space: nowrap; font-weight: 800; letter-spacing: 0.14em; text-indent: 0.14em; line-height: 1.1; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6); }
+.boot__en { margin-top: 10px; font: 600 clamp(11px, min(1.9vw, 2.2vh), 15px) / 1 var(--num); letter-spacing: 0.5em; text-indent: 0.5em; color: var(--gold); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7); }
+.boot__lede { margin: 14px auto 0; max-width: 30em; color: rgba(244, 241, 234, 0.82); font-size: clamp(12px, min(1.9vw, 2.1vh), 15px); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9); text-wrap: balance; }
+.boot__bar { width: min(320px, 60vw); height: 3px; margin: 0 auto 12px; background: rgba(255, 255, 255, 0.14); border-radius: 2px; overflow: hidden; }
+.boot__bar i { display: block; height: 100%; width: 0%; background: var(--gold); transition: width 0.25s ease; }
+.boot__msg { font-size: 12px; color: var(--dim); letter-spacing: 0.08em; min-height: 1.5em; }
+.boot__start { display: none; margin: 0 auto; padding: 14px 46px; border: 0; border-radius: 999px; background: var(--gold); color: #1a1300; font: 700 17px/1 var(--font); letter-spacing: 0.3em; text-indent: 0.3em; cursor: pointer; box-shadow: 0 8px 30px rgba(242, 193, 78, 0.35); transition: transform 0.15s ease; }
+.boot__start:hover { transform: translateY(-2px) scale(1.03); }
+.boot__keys { display: none; margin: 18px auto 0; gap: 8px 16px; flex-wrap: wrap; justify-content: center; max-width: 640px; font-size: 12px; color: rgba(244, 241, 234, 0.78); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9); }
+.boot__keys span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.boot.is-ready .boot__bar, .boot.is-ready .boot__msg { display: none; }
+.boot.is-ready .boot__start { display: inline-block; }
+.boot.is-ready .boot__keys--kbd { display: flex; }
+.is-touch .boot.is-ready .boot__keys--kbd { display: none; }
+.is-touch .boot.is-ready .boot__keys--touch { display: flex; }
+.boot__credit { margin-top: 16px; font-size: 12px; color: var(--dim); letter-spacing: 0.1em; }
+.boot__osm { display: block; margin-top: 4px; font-size: 11px; letter-spacing: 0.04em; color: inherit; opacity: 0.75; text-decoration: none; }
+@media (min-width: 900px) { .boot__credit { position: absolute; right: 18px; bottom: 14px; margin: 0; text-align: right; } }
+/* 横屏：字靠左排，右边留给人和车（镜头也会把主角挪到画面右侧，见 main.js） */
+@media (min-aspect-ratio: 5/4) and (min-width: 860px) {
+  .boot { align-items: flex-start; text-align: left; padding-left: clamp(28px, 6vw, 110px); padding-right: 44vw; }
+  .boot__title, .boot__en { text-indent: 0; }
+  .boot__title { font-size: clamp(40px, min(7.4vw, 13vh), 96px); } /* 左半边要放得下一整行标题 */
+  .boot__lede, .boot__bar, .boot__start, .boot__keys { margin-left: 0; }
+  .boot__keys { justify-content: flex-start; }
+  .boot.is-ready { background: linear-gradient(90deg, rgba(7, 9, 13, 0.86) 0%, rgba(7, 9, 13, 0.56) 32%, rgba(7, 9, 13, 0) 60%), linear-gradient(180deg, rgba(7, 9, 13, 0.3) 0%, rgba(7, 9, 13, 0) 28%, rgba(7, 9, 13, 0) 72%, rgba(7, 9, 13, 0.4) 100%); }
+}
+
+/* ── 顶部：时间、地点、钱包 ── */
+.h-top { position: absolute; left: 18px; top: 14px; display: flex; align-items: baseline; gap: 12px; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75); }
+.h-clock { font: 700 30px/1 var(--num); letter-spacing: 0.02em; }
+.h-place { font-size: 15px; font-weight: 600; letter-spacing: 0.06em; }
+.h-wallet { position: absolute; right: 18px; top: 12px; text-align: right; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75); }
+.h-wallet b { display: block; font: 700 30px/1 var(--num); color: var(--gold); }
+.h-wallet b i { font-style: normal; }
+.h-wallet b u { margin-left: 5px; font: 600 12px/1 var(--font); text-decoration: none; color: var(--dim); letter-spacing: 0.08em; }
+.h-wallet span { font-size: 12px; color: var(--dim); letter-spacing: 0.08em; }
+
+/* ── 左下：手机（小地图）── */
+.h-phone { position: absolute; left: 18px; bottom: 18px; width: 204px; padding: 10px 10px 8px; border-radius: 26px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45); }
+.h-mini { display: block; width: 184px; height: 184px; border-radius: 50%; }
+.h-street { margin-top: 6px; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 右下：车速 ── */
+.h-speedo { position: absolute; right: 22px; bottom: 44px; text-align: right; opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8); }
+.h-speedo.is-on { opacity: 1; transform: none; }
+.h-speedo b { font: 700 64px/0.9 var(--num); }
+.h-speedo span { margin-left: 6px; font: 600 13px/1 var(--num); color: var(--dim); letter-spacing: 0.1em; }
+.h-speedo em { display: block; margin-top: 4px; font-style: normal; font-size: 12px; color: var(--gold); letter-spacing: 0.12em; }
+.h-credit { position: absolute; right: 18px; bottom: 12px; font-size: 11px; color: rgba(244, 241, 234, 0.5); letter-spacing: 0.1em; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8); }
+
+/* ── 特技：连招、入账的分数、氮气表 ── */
+.h-combo { position: absolute; left: 50%; top: 17%; transform: translate(-50%, -8px); width: min(92vw, 640px); text-align: center; opacity: 0; transition: opacity 0.18s ease, transform 0.18s ease; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85); }
+.h-combo.is-open { opacity: 1; transform: translate(-50%, 0); }
+.h-combo__list { font-size: 17px; font-weight: 700; letter-spacing: 0.06em; line-height: 1.4; text-wrap: balance; }
+.h-combo__score b { font: 700 40px/1.1 var(--num); color: var(--gold); }
+.h-combo__score i { margin-left: 8px; font: 700 22px/1 var(--num); font-style: normal; color: #ff9a4a; }
+.h-pop { position: absolute; left: 50%; top: 28%; width: 0; }
+.h-pop__item { position: absolute; left: 0; top: 0; transform: translate(-50%, 20px) scale(0.7); opacity: 0; white-space: nowrap; text-align: center; text-shadow: 0 3px 18px rgba(0, 0, 0, 0.8); transition: transform 0.35s cubic-bezier(0.2, 1.5, 0.4, 1), opacity 0.25s ease; }
+.h-pop__item.is-in { opacity: 1; transform: translate(-50%, 0) scale(1); animation: popout 0.5s ease 1.7s forwards; }
+.h-pop__item b { display: block; font: 800 62px/1 var(--num); color: var(--gold); }
+.h-pop__item span { display: block; margin-top: 6px; font-size: 20px; font-weight: 800; letter-spacing: 0.2em; text-indent: 0.2em; color: #fff; }
+@keyframes popout { to { opacity: 0; transform: translate(-50%, -46px) scale(1.06); } }
+.h-nitro { position: absolute; right: 24px; bottom: 124px; width: 132px; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, 0.16); opacity: 0; transition: opacity 0.25s ease; }
+.h-nitro.is-on { opacity: 1; }
+.h-nitro i { display: block; height: 100%; width: 100%; border-radius: 4px; background: linear-gradient(90deg, #35e6ff, #7df5ff); transition: width 0.12s linear; }
+.h-nitro.is-hot i { background: linear-gradient(90deg, #ff7a2a, #ffd36a); box-shadow: 0 0 12px rgba(255, 140, 50, 0.9); }
+.h-nitro span { position: absolute; right: 0; top: -17px; font-size: 11px; color: var(--dim); letter-spacing: 0.14em; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); }
+
+/* ── 提示、按键说明 ── */
+.tip { position: absolute; left: 50%; bottom: 84px; transform: translateX(-50%); max-width: 92vw; padding: 8px 18px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-size: 14px; letter-spacing: 0.04em; text-align: center; white-space: nowrap; backdrop-filter: blur(8px); }
+.tip:empty { display: none; }
+.h-keys { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 14px; font-size: 11px; color: rgba(244, 241, 234, 0.7); white-space: nowrap; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); }
+.h-keys span { display: inline-flex; align-items: center; gap: 5px; }
+.h-aeb { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); padding: 6px 16px; border-radius: 6px; background: rgba(229, 72, 77, 0.9); font-weight: 700; letter-spacing: 0.3em; text-indent: 0.3em; opacity: 0; transition: opacity 0.12s; }
+.h-aeb.is-on { opacity: 1; }
+
+/* ── 消息 ── */
+.h-toasts { position: absolute; left: 50%; top: 64px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(92vw, 560px); transition: top 0.25s ease; }
+.h-toast { padding: 9px 18px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(8px); font-size: 14px; text-align: center; opacity: 0; transform: translateY(-8px); transition: opacity 0.3s ease, transform 0.3s ease; }
+.h-toast.is-in { opacity: 1; transform: none; }
+.h-toast.is-good { border-color: rgba(242, 193, 78, 0.6); color: var(--gold); font-weight: 700; }
+
+/* ── 订单卡、接单大厅 ── */
+.h-order { position: absolute; right: 18px; top: 78px; width: 250px; padding: 12px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px); opacity: 0; transform: translateX(14px); transition: opacity 0.25s ease, transform 0.25s ease; }
+.h-order.is-open { opacity: 1; transform: none; }
+.h-order__head { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.h-order__type { flex: none; padding: 2px 9px; border-radius: 999px; background: var(--gold); color: #1a1300; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; }
+.h-order__step { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.h-order__meta { margin-top: 8px; display: flex; align-items: baseline; gap: 10px; font: 600 14px/1 var(--num); color: var(--dim); }
+.h-order__meta b { font-size: 20px; color: var(--gold); }
+.h-order__meta span:nth-of-type(2) { margin-left: auto; font-size: 12px; }
+.h-order__meta .is-late { color: var(--red); }
+.h-order__cancel { align-self: center; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.06); color: var(--dim); font: 600 11px/1 var(--font); cursor: pointer; }
+.h-order__cancel:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.4); }
+.h-order.is-open .h-order__cancel { pointer-events: auto; }
+.h-order__extra { margin-top: 6px; font-size: 12px; color: var(--red); }
+.h-order__extra:empty { display: none; }
+.h-offers { position: absolute; left: 50%; top: 50%; width: min(92vw, 520px); padding: 16px; border-radius: 18px; background: rgba(12, 15, 20, 0.9); border: 1px solid var(--line); backdrop-filter: blur(14px); transform: translate(-50%, -46%) scale(0.97); opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 4; }
+.h-offers.is-open { opacity: 1; transform: translate(-50%, -50%); pointer-events: auto; }
+.h-offers__title { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; }
+.h-offers__title span { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--dim); letter-spacing: 0.04em; }
+.h-offers__close { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.06); color: var(--ink); font: 400 18px/1 var(--font); cursor: pointer; }
+.h-offer { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); margin-top: 8px; cursor: pointer; transition: background 0.15s ease; }
+.h-offer:hover { background: rgba(255, 255, 255, 0.11); }
+.h-offer div { flex: 1; min-width: 0; }
+.h-offer b { display: block; font-size: 15px; }
+.h-offer span { display: block; font-size: 12px; color: var(--dim); }
+.h-offer em { font: 700 19px/1 var(--num); font-style: normal; color: var(--gold); text-align: right; white-space: nowrap; }
+.h-offer em small { display: block; margin-top: 5px; font: 400 11px/1 var(--font); color: var(--dim); }
+.h-offer.is-locked { opacity: 0.45; cursor: default; }
+.h-offer.is-locked:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* ── 打卡明信片 ── */
+.h-card { position: absolute; left: 28px; bottom: 28px; width: min(86vw, 400px); padding: 20px 22px 16px; border-radius: 6px; background: #f6f1e4; color: #2a251c; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); transform: translateY(24px) rotate(-1.5deg); opacity: 0; transition: opacity 0.35s ease, transform 0.35s ease; z-index: 5; cursor: pointer; }
+.h-card.is-open { opacity: 1; transform: rotate(-1.5deg); pointer-events: auto; }
+.h-card__no { font: 600 11px/1 var(--num); letter-spacing: 0.3em; color: #a0884d; }
+.h-card__name { margin-top: 8px; font-size: 30px; font-weight: 800; letter-spacing: 0.08em; line-height: 1.2; }
+.h-card__sub { font-size: 13px; color: #7a6f58; letter-spacing: 0.08em; }
+.h-card p { margin: 12px 0 0; font-size: 14px; line-height: 1.75; }
+.h-card__foot { margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbbf9f; font-size: 12px; color: #8a7d60; }
+
+/* ── 气泡、大地图、转场 ── */
+.h-bubble { position: absolute; left: 0; top: 0; padding: 4px 11px; border-radius: 12px; background: rgba(255, 255, 255, 0.94); color: #1c1c1c; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35); will-change: transform; }
+.h-bigmap { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(6, 8, 12, 0.78); backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.2s ease; z-index: 6; cursor: pointer; }
+.h-bigmap.is-open { opacity: 1; pointer-events: auto; }
+.h-bigmap canvas { border-radius: 14px; box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6); }
+.h-bigmap__hint { position: absolute; bottom: 20px; font-size: 12px; color: var(--dim); letter-spacing: 0.08em; white-space: nowrap; }
+.dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; vertical-align: 1px; }
+.dot--photo { background: var(--cyan); }
+.dot--goal { background: var(--gold); }
+.dot--friend { background: linear-gradient(135deg, #35e6ff 0 33%, #2fd67c 33% 66%, #a47bff 66%); box-shadow: 0 0 0 2px #fff; }
+.dot--ramp { width: 0; height: 0; border-radius: 0; background: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid #ff9a4a; }
+.dot--bike { background: #ff7a45; border-radius: 2px; transform: rotate(45deg); }
+.h-fade { position: absolute; inset: 0; background: #fff; opacity: 0; transition: opacity 0.35s ease; z-index: 7; }
+.h-fade.is-flash { opacity: 0.85; transition: none; }
+.only-touch { display: none; }
+.is-touch .only-touch { display: inline; }
+.is-touch .only-kbd { display: none; }
+
+/* ── 触屏：按钮和摇杆指示圈（只在触屏设备上出现）── */
+.t-pad, .t-bar, .t-stick { display: none; }
+.is-touch .t-pad { display: block; position: absolute; right: 14px; bottom: 16px; width: 190px; height: 176px; }
+.is-touch .t-bar { display: flex; gap: 8px; position: absolute; left: 12px; top: 50px; }
+.t-btn { position: absolute; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.34); background: rgba(14, 17, 23, 0.56); color: var(--ink); font: 700 14px/1 var(--font); letter-spacing: 0.04em; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; backdrop-filter: blur(6px); transition: transform 0.08s ease, background 0.08s ease, opacity 0.2s ease; }
+.t-btn.is-down { transform: scale(0.92); background: rgba(242, 193, 78, 0.5); }
+.t-btn.is-dim { opacity: 0.45; }
+.t-btn.is-hidden { opacity: 0; pointer-events: none; }
+.t-btn.is-gone { display: none; }
+.t-btn--main { right: 0; bottom: 0; width: 78px; height: 78px; font-size: 17px; background: rgba(242, 193, 78, 0.9); border-color: transparent; color: #1a1300; }
+.t-btn--main.is-down { background: #ffd978; }
+.t-btn--a { right: 10px; bottom: 90px; width: 58px; height: 58px; }
+.t-btn--b { right: 80px; bottom: 66px; width: 58px; height: 58px; }
+.t-btn--c { right: 92px; bottom: 0; width: 58px; height: 58px; border-color: rgba(95, 240, 255, 0.8); color: var(--cyan); }
+.t-btn--d { right: 124px; bottom: 112px; width: 58px; height: 58px; border-color: rgba(255, 154, 74, 0.85); color: #ffb37a; }
+.t-btn--s { position: static; width: auto; height: 34px; padding: 0 13px; border-radius: 999px; font-size: 13px; }
+.t-stick { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; transition: opacity 0.15s ease; }
+.is-touch .t-stick { display: block; }
+.t-stick.is-on { opacity: 1; }
+.t-stick::before { content: ""; position: absolute; left: -56px; top: -56px; width: 112px; height: 112px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(14, 17, 23, 0.22); }
+.t-stick i { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); }
+.is-touch .h-keys { display: none; }
+.is-touch .h-credit { display: none; }
+.is-touch .h-speedo { right: 20px; bottom: 206px; }
+.is-touch .h-nitro { right: 20px; bottom: 286px; }
+.is-touch .h-toasts { top: 96px; }
+.is-touch .tip { bottom: 200px; }
+
+/* ── 窗口不够宽：按键说明收到右边竖着排；有订单时提示让开订单卡 ── */
+@media (max-width: 1100px) {
+  #hud.has-order .h-toasts { left: calc(50% - 142px); width: min(calc(100vw - 320px), 560px); }
+}
+@media (max-width: 980px) {
+  .h-keys { left: auto; right: 16px; bottom: 148px; transform: none; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .h-keys span { flex-direction: row-reverse; }
+}
+@media (max-width: 720px) {
+  .h-phone { width: 150px; padding: 8px; border-radius: 20px; left: 10px; bottom: 10px; }
+  .h-mini { width: 134px; height: 134px; }
+  .h-top { left: 12px; top: 10px; gap: 8px; }
+  .h-wallet { right: 12px; top: 9px; }
+  .h-clock, .h-wallet b { font-size: 22px; }
+  .h-place { font-size: 13px; }
+  .h-wallet span { font-size: 11px; }
+  .h-speedo { right: 14px; bottom: 34px; }
+  .h-speedo b { font-size: 44px; }
+  .h-nitro { right: 14px; bottom: 96px; width: 108px; }
+  .h-combo { top: 21%; }
+  .h-combo__list { font-size: 15px; }
+  .h-combo__score b { font-size: 32px; }
+  .h-pop__item b { font-size: 48px; }
+  .h-pop__item span { font-size: 16px; }
+  .h-wallet span { max-width: 62vw; margin-left: auto; display: block; line-height: 1.5; }
+  .h-credit { right: 12px; bottom: 10px; }
+  .h-keys { right: 12px; bottom: 124px; font-size: 10.5px; }
+  .tip { bottom: 198px; font-size: 13px; white-space: normal; }
+  /* 订单卡改成顶上一整条 */
+  .h-order { left: 10px; right: 10px; top: 46px; width: auto; padding: 8px 12px; border-radius: 12px; transform: translateY(-8px); }
+  .h-order__head { flex-direction: row; align-items: center; }
+  .h-order__step { min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .h-order__meta { margin-top: 6px; font-size: 13px; }
+  .h-order__meta b { font-size: 17px; }
+  .h-bigmap__hint { white-space: normal; text-align: center; padding: 0 12px; line-height: 1.9; }
+  .h-order__extra { margin-top: 4px; }
+  .h-toasts { top: 52px; }
+  #hud.has-order .h-toasts { left: 50%; width: min(92vw, 560px); top: 122px; }
+  .h-toast { padding: 7px 14px; font-size: 13px; }
+  .h-card { left: 12px; bottom: 12px; width: min(calc(100vw - 24px), 400px); padding: 16px 18px 12px; }
+  .h-card__name { font-size: 26px; }
+  .h-bigmap__hint { bottom: 14px; font-size: 11px; }
+  .is-touch .t-bar { top: 44px; left: 10px; }
+  .is-touch .h-order { top: 86px; }
+  .is-touch .h-toasts { top: 90px; }
+  .is-touch #hud.has-order .h-toasts { top: 162px; }
+  .is-touch .h-speedo { right: 16px; bottom: 202px; }
+  .is-touch .h-nitro { right: 16px; bottom: 268px; }
+}
+/* 横着拿的手机：高度很小，把手机地图缩一缩 */
+@media (max-height: 460px) {
+  .h-phone { width: 124px; padding: 6px; border-radius: 16px; left: 8px; bottom: 8px; }
+  .h-mini { width: 110px; height: 110px; }
+  .h-street { font-size: 11px; margin-top: 3px; }
+  .tip { bottom: 16px; }
+  .is-touch .tip { bottom: 16px; }
+  .h-card { padding: 12px 16px 10px; }
+  .h-card p { font-size: 13px; line-height: 1.6; margin-top: 8px; }
+  .h-card__name { font-size: 22px; margin-top: 4px; }
+}

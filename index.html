@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>国贸不打烊 · Guomao Never Sleeps</title>
+<meta name="description" content="骑上一辆很酷的摩托，在北京国贸到处溜达、飞跳台、钻火圈、翻跟头的开放世界小游戏。摩托、车辆和人物由 Aholo Lux3D 生成。">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./styles-e1c4b9c9cc.css">
+</head>
+<body>
+<canvas id="stage" tabindex="0"></canvas>
+<div id="hud"></div>
+<div id="boot" class="boot">
+  <!-- 标题在上、按钮在下，中间留给街景和主角 -->
+  <div class="boot__head">
+    <div class="boot__title">国贸不打烊</div>
+    <div class="boot__en">GUOMAO NEVER SLEEPS</div>
+    <p class="boot__lede">骑上摩托，在北京国贸到处溜达：飞跳台、钻火圈、翻跟头、耍帅。这辆摩托、街上的车和人，都是 Aholo Lux3D 从一句话变出来的。</p>
+  </div>
+  <div class="boot__foot">
+    <div class="boot__bar"><i id="bootBar"></i></div>
+    <div class="boot__msg" id="bootMsg">正在搭建国贸…</div>
+    <button class="boot__start" id="bootStart" type="button">开始溜达</button>
+    <div class="boot__keys boot__keys--kbd">
+      <span><kbd>W A S D</kbd>骑车</span><span><kbd>空格</kbd>起跳</span><span><kbd>Shift</kbd>喷火加速</span><span><kbd>空中 W / S</kbd>翻跟头</span><span><kbd>Q</kbd>耍帅</span><span><kbd>X</kbd>甩尾</span>
+      <span><kbd>鼠标拖动</kbd>转视角</span><span><kbd>F</kbd>上下车</span><span><kbd>R</kbd>叫摩托</span><span><kbd>E</kbd>打卡 / 合影</span><span><kbd>Tab</kbd>路线</span><span><kbd>M</kbd>地图</span><span><kbd>T</kbd>拨快时间</span><span><kbd>N</kbd>静音</span>
+    </div>
+    <div class="boot__keys boot__keys--touch">
+      <span>左半屏拖动：骑车，腾空时往后拉是后空翻</span><span>右半屏拖动：转视角</span><span>右下角按钮：跳、氮气、耍帅</span>
+    </div>
+    <div class="boot__credit">作者：狂热AI<a class="boot__osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">地图数据 © OpenStreetMap 贡献者</a></div>
+  </div>
+</div>
+<script type="module" src="./game-6b52e82fa9.js"></script>
+</body>
+</html>
